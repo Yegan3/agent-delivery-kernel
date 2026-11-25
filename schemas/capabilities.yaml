@@ -1,0 +1,57 @@
+# 能力清单（声明式）
+# 所有示例值均为合成，不含真实业务词。
+# 加一条能力 = 内核脚本零改动；差集与任务单自动生成。
+
+schema_version: 1
+
+capabilities:
+  - id: example_channel
+    since_version: "0.1.0"
+    summary: "示例外部通道：业务类问答先经检索再作答"
+    required: false
+    declares:
+      inputs_items:
+        example_channel:
+          scope: common
+          required_at: install
+          required: false
+          kind: reference
+          decision: ""
+          degrade: "未接入时回退本地文档取证，并明确标注"
+      registry_keys:
+        example_channels: []
+    detect:
+      inputs_key: example_channel
+      decision_field: decision
+      registry_key: example_channels
+      probe_state_file: example-probe.json
+      ready_when: "decision == 'use' and probe.status == 'ok' and registry declared"
+    steps:
+      - id: confirm
+        type: confirm_gate
+        title: "确认是否接入"
+        instruction: "向用户呈现用途/代价/降级，请其在 use / declined 间拍板；不默认选、不默认跳过"
+      - id: declare
+        type: script
+        title: "补齐登记项"
+        command: "python scripts/kernel.py --workdir <workdir> --apply"
+      - id: probe
+        type: agent_host_capability
+        title: "实测通道"
+        command: "python scripts/kernel.py --workdir <workdir> --plan"
+        then: "由 agent 用宿主能力实测并写观测结果，再交回脚本判定"
+      - id: repair
+        type: repair_loop
+        title: "不通不等于跳过"
+        instruction: "按 reason_code 给确切动作；修好实测复验；禁止静默跳过或报告完成"
+        resume_at: probe
+      - id: finalize
+        type: finalize
+        title: "收口与断言"
+        command: "python scripts/kernel.py --workdir <workdir> --finalize"
+        assert:
+          - "受保护文件哈希不变"
+          - "coverage 与检查时一致"
+          - "能力就绪或明确 declined"
+    done_when: "decision == 'declined' or (declared and probe.status == 'ok')"
+    degrade: "未通则记 blocked_reason + resume_at，下次从断点继续"

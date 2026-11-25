@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "coverage": {"declared": 2, "available": 2, "required_available": 1, "required_total": 1},
+  "degraded": [],
+  "note": "合成清单，仅用于演示"
+}

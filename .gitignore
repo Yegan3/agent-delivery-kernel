@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# 运行时状态（示例工作目录的副本 / 演示生成的 state，不入库）
+capability-state.json
+*-probe.json
+
+# 本机 / 编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# 凭据与本地配置（永不入库）
+*.env
+.env.*
+secrets.*
+*.pem
+*.key

@@ -1,0 +1,8 @@
+inputs:
+  source_root:
+    scope: common
+    required_at: install
+    required: true
+    kind: dir
+    path: "/synthetic/source"
+note: "示例工作目录：所有值均为合成，无真实业务信息"
